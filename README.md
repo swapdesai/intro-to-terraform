@@ -20,10 +20,15 @@ export AWS_SECRET_ACCESS_KEY=<<AWS_SECRET_ACCESS_KEY>>
 To create the cluster, use terraform as below:
 
 ```
+cd stage/vpc
+terraform init
+terraform plan
+terraform apply
+
 cd stage/services/frontend-app
 terraform init
 terraform plan
-terraform plan -var server_port="8080"
+terraform apply -var server_port="8080"
 ```
 This ouputs:
 
