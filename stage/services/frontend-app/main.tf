@@ -7,7 +7,7 @@
 # Configure the cloud provider
 # ------------------------------------------------------------------------------
 provider "aws" {
-  region     = "ap-southeast-2"
+  region = "ap-southeast-2"
 }
 
 # ------------------------------------------------------------------------------
@@ -16,20 +16,13 @@ provider "aws" {
 terraform {
   backend "s3" {
     bucket = "intro-to-terraform-remote-state-storage"
-    key    = "terraform.tfstate"
+    key    = "stage/services/frontend-app/terraform.tfstate"
     region = "ap-southeast-2"
 
     # (Optional) The name of a DynamoDB table to use for state locking and consistency.
     # The table must have a primary key named LockID. If not present, locking will be disabled.
     # dynamodb_table = <<dynamodb_table>>
-
   }
-}
-
-# Server port EC2 insatnce should listen on
-variable "server_port" {
-  description = "The port the server will use for HTTP requests"
-  default     = 8080
 }
 
 # ------------------------------------------------------------------------------
@@ -104,6 +97,17 @@ resource "aws_security_group" "instance" {
   }
 }
 
+# Pull VPC date from remote storage
+data "terraform_remote_state" "vpc" {
+  backend = "s3"
+
+  config {
+    bucket = "intro-to-terraform-remote-state-storage"
+    key    = "stage/vpc/terraform.tfstate"
+    region = "ap-southeast-2"
+  }
+}
+
 # ------------------------------------------------------------------------------
 # Configure the Elastic Load Balancer (ELB) configuration
 # ------------------------------------------------------------------------------
@@ -115,6 +119,9 @@ resource "aws_elb" "example" {
 
   # ELB that will work across all of the AZs in your account
   availability_zones = ["${data.aws_availability_zones.all.names}"]
+
+  # A list of subnet IDs to attach to the ELB
+  subnets = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
 
   # HTTP health check
   health_check {
@@ -154,9 +161,4 @@ resource "aws_security_group" "elb" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-}
-
-# Get DNS name of the ELB
-output "elb_dns_name" {
-  value = "${aws_elb.example.dns_name}"
 }
