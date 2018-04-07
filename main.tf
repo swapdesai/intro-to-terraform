@@ -11,7 +11,7 @@ provider "aws" {
 }
 
 # ------------------------------------------------------------------------------
-# Configure the AWS S3 as remote backend inclusing locking and consistency
+# Configure the AWS S3 as remote backend including locking and consistency
 # ------------------------------------------------------------------------------
 terraform {
   backend "s3" {
