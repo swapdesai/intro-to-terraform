@@ -20,6 +20,7 @@ export AWS_SECRET_ACCESS_KEY=<<AWS_SECRET_ACCESS_KEY>>
 To create the cluster, use terraform as below:
 
 ```
+cd stage/services/frontend-app
 terraform init
 terraform plan
 terraform plan -var server_port="8080"
@@ -39,16 +40,6 @@ curl http://<elb_dns_name>
 
 ### Success!
 
-## Manage Terrafom state files in S3
-You need to create a bucket in S# before using this command
-```
-terraform remote config \
-    -backend=s3 \
-    -backend-config="bucket=(YOUR_BUCKET_NAME)" \
-    -backend-config="key=terraform.tfstate" \
-    -backend-config="region=(YOUR_BUCKET_REGION)" \
-    -backend-config="encrypt=true"
-```
 
 ## Clean up
 ```terraform destroy
