@@ -1,4 +1,9 @@
-# Variable to export the subnet IDs
+# Export id of the VPC
+output "vpc_id" {
+  value = "${aws_vpc.stage.id}"
+}
+
+# Export the subnet IDs
 output "public_subnet_ids" {
   value = [
     "${aws_subnet.public-2a.id}",

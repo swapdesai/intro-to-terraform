@@ -35,6 +35,15 @@ resource "aws_vpc" "stage" {
   }
 }
 
+# Create a VPC internet gateway
+resource "aws_internet_gateway" "stage" {
+	vpc_id = "${aws_vpc.stage.id}"
+
+	tags {
+    Name = "stage"
+  }
+}
+
 # Public subnet 2a
 resource "aws_subnet" "public-2a" {
   vpc_id = "${aws_vpc.stage.id}"

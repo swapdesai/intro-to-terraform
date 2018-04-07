@@ -47,7 +47,26 @@ curl http://<elb_dns_name>
 
 
 ## Clean up
-```terraform destroy
+
+#### Clean up EC2 infrastructure
+Repeat the clean up in the folder
+
+```
+cd stage/services/frontend-app
+terraform destroy
+
+Do you really want to destroy?
+  Terraform will delete all your managed infrastructure.
+  There is no undo. Only 'yes' will be accepted to confirm.
+Enter a value:
+```
+Type in “yes” and hit enter
+
+#### Clean up VPC infrastructure
+```
+cd stage/vpc
+terraform destroy
+
 Do you really want to destroy?
   Terraform will delete all your managed infrastructure.
   There is no undo. Only 'yes' will be accepted to confirm.

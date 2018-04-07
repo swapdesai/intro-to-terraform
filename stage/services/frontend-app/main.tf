@@ -118,8 +118,8 @@ resource "aws_elb" "example" {
   security_groups = ["${aws_security_group.elb.id}"]
 
   # ELB that will work across all of the AZs in your account
-  availability_zones = ["${data.aws_availability_zones.all.names}"]
-
+  # availability_zones = ["${data.aws_availability_zones.all.names}"]
+  # or
   # A list of subnet IDs to attach to the ELB
   subnets = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
 
@@ -145,6 +145,8 @@ resource "aws_elb" "example" {
 # ------------------------------------------------------------------------------
 resource "aws_security_group" "elb" {
   name = "terraform-example-elb"
+
+  vpc_id = "${data.terraform_remote_state.vpc.vpc_id}"
 
   # Receive HTTP requests on port 80
   ingress {
