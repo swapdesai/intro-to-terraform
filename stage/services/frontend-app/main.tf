@@ -25,6 +25,17 @@ terraform {
   }
 }
 
+# Pull VPC date from remote storage
+data "terraform_remote_state" "vpc" {
+  backend = "s3"
+
+  config {
+    bucket = "intro-to-terraform-remote-state-storage"
+    key    = "stage/vpc/terraform.tfstate"
+    region = "ap-southeast-2"
+  }
+}
+
 # ------------------------------------------------------------------------------
 # Configure the AWS launch configuration
 # ------------------------------------------------------------------------------
@@ -61,6 +72,9 @@ resource "aws_autoscaling_group" "example" {
   # Availability Zones (AZs) the EC2 instances should be deployed
   availability_zones = ["${data.aws_availability_zones.all.names}"]
 
+  # A list of subnet IDs to launch resources in.
+  vpc_zone_identifier = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
+
   min_size = 2
   max_size = 10
 
@@ -83,6 +97,8 @@ resource "aws_autoscaling_group" "example" {
 resource "aws_security_group" "instance" {
   name = "terraform-example-instance"
 
+  vpc_id = "${data.terraform_remote_state.vpc.vpc_id}"
+
   # Allow the EC2 Instance to receive traffic on port server_port / 8080 from the CIDR block 0.0.0.0/0
   ingress {
     from_port   = "${var.server_port}"
@@ -94,17 +110,6 @@ resource "aws_security_group" "instance" {
   # Setting this because of 'aws_autoscaling_group' dependency on this resource
   lifecycle {
     create_before_destroy = true
-  }
-}
-
-# Pull VPC date from remote storage
-data "terraform_remote_state" "vpc" {
-  backend = "s3"
-
-  config {
-    bucket = "intro-to-terraform-remote-state-storage"
-    key    = "stage/vpc/terraform.tfstate"
-    region = "ap-southeast-2"
   }
 }
 

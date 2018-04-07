@@ -6,8 +6,8 @@ output "vpc_id" {
 # Export the subnet IDs
 output "public_subnet_ids" {
   value = [
-    "${aws_subnet.public-2a.id}",
-    "${aws_subnet.public-2b.id}",
-    "${aws_subnet.public-2c.id}"
+    "${aws_subnet.public-a.id}",
+    "${aws_subnet.public-b.id}",
+    "${aws_subnet.public-c.id}"
   ]
 }
