@@ -1,3 +1,9 @@
+# The environment name
+variable "environment_name" {
+  description = "The name of the environment"
+  default     = "stage"
+}
+
 # Server port EC2 insatnce should listen on
 variable "server_port" {
   description = "The port the server will use for HTTP requests"
@@ -17,6 +23,6 @@ variable "vpc_id" {
 }
 
 variable "public_subnet_ids" {
-  type        = "list"
   description = "The public subnet ids from module vpc"
+  type        = "list"
 }

@@ -24,9 +24,18 @@ data "terraform_remote_state" "vpc" {
   }
 }
 
+variable "environment_name" {
+  default = "prod"
+}
+
+# ------------------------------------------------------------------------------
+# Execute frontend module
+# ------------------------------------------------------------------------------
 module "frontend" {
   source = "../../../modules/frontend-app"
 
+  environment_name = "${var.environment_name}"
+  
   min_size = 1
   max_size = 2
 

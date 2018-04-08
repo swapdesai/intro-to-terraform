@@ -13,19 +13,48 @@ terraform {
   }
 }
 
+# Pull VPC date from remote storage
+data "terraform_remote_state" "vpc" {
+  backend = "s3"
+
+  config {
+    bucket = "intro-to-terraform-remote-state-storage"
+    key    = "prod/vpc/terraform.tfstate"
+    region = "ap-southeast-2"
+  }
+}
+
+variable "environment_name" {
+  default = "prod"
+}
+
+# ------------------------------------------------------------------------------
+# Execute frontend module
+# ------------------------------------------------------------------------------
 module "frontend" {
   source = "../../../modules/frontend-app"
 
-  min_size = 5
-  max_size = 20
+  environment_name = "${var.environment_name}"
+  
+  min_size = 2
+  max_size = 5
+
+  vpc_id            = "${data.terraform_remote_state.vpc.vpc_id}"
+  public_subnet_ids = "${data.terraform_remote_state.vpc.public_subnet_ids}"
 }
 
-# Adding Auto Scalign policy to prod env
+# Adding Auto Scaling policy to prod env
 resource "aws_autoscaling_policy" "scale_out" {
-  name = "scale-out-frontend-app"
+  name                   = "scale-out-frontend-app"
   autoscaling_group_name = "${module.frontend.asg_name}"
-  adjustment_type = "ChangeInCapacity"
-  policy_type = "SimpleScaling"
+
+  adjustment_type    = "ChangeInCapacity"
+  policy_type        = "SimpleScaling"
   scaling_adjustment = 1
-  cooldown = 200
+  cooldown           = 200
+}
+
+# Get DNS name of the ELB
+output "elb_dns_name" {
+  value = "${module.frontend.elb_dns_name}"
 }

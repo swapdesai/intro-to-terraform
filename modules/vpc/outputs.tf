@@ -1,6 +1,6 @@
 # Export id of the VPC
 output "vpc_id" {
-  value = "${aws_vpc.stage.id}"
+  value = "${aws_vpc.vpc.id}"
 }
 
 # Export the subnet IDs

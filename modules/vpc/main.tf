@@ -12,70 +12,76 @@ provider "aws" {
 # ------------------------------------------------------------------------------
 # Configure a VPC
 # ------------------------------------------------------------------------------
-resource "aws_vpc" "stage" {
+resource "aws_vpc" "vpc" {
   cidr_block = "10.0.0.0/18"
 
   tags {
-    Name = "stage"
+    Name        = "${var.environment_name}-vpc"
+    Environment = "${var.environment_name}"
   }
 }
 
 # Create a VPC internet gateway
-resource "aws_internet_gateway" "stage" {
-	vpc_id = "${aws_vpc.stage.id}"
+resource "aws_internet_gateway" "internet_gateway" {
+	vpc_id = "${aws_vpc.vpc.id}"
 
 	tags {
-    Name = "stage"
+    Name        = "${var.environment_name}-internet-gateway"
+    Environment = "${var.environment_name}"
   }
 }
 
 # Public subnet 2a
 resource "aws_subnet" "public-a" {
-  vpc_id = "${aws_vpc.stage.id}"
+  vpc_id = "${aws_vpc.vpc.id}"
 
   cidr_block       = "10.0.0.0/24"
   availability_zone = "ap-southeast-2a"
 
   tags {
-    Name = "public-a"
+    Name        = "${var.environment_name}-public-a"
+    Environment = "${var.environment_name}"
   }
 }
 
 # Public subnet 2a
 resource "aws_subnet" "public-b" {
-  vpc_id = "${aws_vpc.stage.id}"
+  vpc_id = "${aws_vpc.vpc.id}"
 
   cidr_block        = "10.0.1.0/24"
   availability_zone = "ap-southeast-2b"
 
   tags {
-    Name = "public-b"
+    Name        = "${var.environment_name}-public-b"
+    Environment = "${var.environment_name}"
   }
 }
 
 # Public subnet 2c
 resource "aws_subnet" "public-c" {
-  vpc_id = "${aws_vpc.stage.id}"
+  vpc_id = "${aws_vpc.vpc.id}"
 
   cidr_block        = "10.0.2.0/24"
   availability_zone = "ap-southeast-2c"
 
   tags {
-    Name = "public-c"
+    Name        = "${var.environment_name}-public-c"
+    Environment = "${var.environment_name}"
   }
 }
 
 # Routing table for public subnets
 resource "aws_route_table" "public" {
-	vpc_id = "${aws_vpc.stage.id}"
+	vpc_id = "${aws_vpc.vpc.id}"
 
 	route {
 		cidr_block = "0.0.0.0/0"
-		gateway_id = "${aws_internet_gateway.stage.id}"
+		gateway_id = "${aws_internet_gateway.internet_gateway.id}"
 	}
 
 	tags {
-    Name = "public"
+    Name        = "${var.environment_name}-public"
+    Environment = "${var.environment_name}"
   }
 }
 

@@ -13,7 +13,26 @@ terraform {
   }
 }
 
+variable "environment_name" {
+  default = "prod"
+}
 
-module "frontend" {
+# ------------------------------------------------------------------------------
+# Execute VPC module
+# ------------------------------------------------------------------------------
+module "vpc" {
   source = "../../modules/vpc"
+
+  environment_name = "${var.environment_name}"
+}
+
+# ------------------------------------------------------------------------------
+# OUTPUTS - Any module outputs need to be explicitly exposed.
+# ------------------------------------------------------------------------------
+output "vpc_id" {
+  value = "${module.vpc.vpc_id}"
+}
+
+output "public_subnet_ids" {
+  value = "${module.vpc.public_subnet_ids}"
 }
