@@ -10,17 +10,6 @@ provider "aws" {
   region = "ap-southeast-2"
 }
 
-# Pull VPC date from remote storage
-data "terraform_remote_state" "vpc" {
-  backend = "s3"
-
-  config {
-    bucket = "intro-to-terraform-remote-state-storage"
-    key    = "stage/vpc/terraform.tfstate"
-    region = "ap-southeast-2"
-  }
-}
-
 # ------------------------------------------------------------------------------
 # Configure the AWS launch configuration
 # ------------------------------------------------------------------------------
@@ -58,7 +47,7 @@ resource "aws_autoscaling_group" "example" {
   availability_zones = ["${data.aws_availability_zones.all.names}"]
 
   # A list of subnet IDs to launch resources in.
-  vpc_zone_identifier = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
+  vpc_zone_identifier = ["${var.public_subnet_ids}"]
 
   min_size = "${var.min_size}"
   max_size = "${var.max_size}"
@@ -82,7 +71,7 @@ resource "aws_autoscaling_group" "example" {
 resource "aws_security_group" "instance" {
   name = "terraform-example-instance"
 
-  vpc_id = "${data.terraform_remote_state.vpc.vpc_id}"
+  vpc_id = "${var.vpc_id}"
 
   # Allow the EC2 Instance to receive traffic on port server_port / 8080 from the CIDR block 0.0.0.0/0
   ingress {
@@ -104,6 +93,9 @@ resource "aws_security_group" "instance" {
 resource "aws_elb" "example" {
   name = "terraform-asg-example"
 
+  # The type of load balancer to create.
+  #load_balancer_type = network ??
+
   # ELB security group
   security_groups = ["${aws_security_group.elb.id}"]
 
@@ -111,7 +103,7 @@ resource "aws_elb" "example" {
   # availability_zones = ["${data.aws_availability_zones.all.names}"]
   # or
   # A list of subnet IDs to attach to the ELB
-  subnets = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
+  subnets = ["${var.public_subnet_ids}"]
 
   # HTTP health check
   health_check {
@@ -136,7 +128,7 @@ resource "aws_elb" "example" {
 resource "aws_security_group" "elb" {
   name = "terraform-example-elb"
 
-  vpc_id = "${data.terraform_remote_state.vpc.vpc_id}"
+  vpc_id = "${var.vpc_id}"
 
   # Receive HTTP requests on port 80
   ingress {
