@@ -1,15 +1,10 @@
-# Server port EC2 insatnce should listen on
-variable "env" {
-  description = "The name of the environment"
-}
-
 # ------------------------------------------------------------------------------
 # Configure the AWS S3 as remote backend including locking and consistency
 # ------------------------------------------------------------------------------
 terraform {
   backend "s3" {
     bucket = "intro-to-terraform-remote-state-storage"
-    key    = "${var.env}/vpc/terraform.tfstate"
+    key    = "prod/services/frontend-app/terraform.tfstate"
     region = "ap-southeast-2"
 
     # (Optional) The name of a DynamoDB table to use for state locking and consistency.
@@ -18,15 +13,19 @@ terraform {
   }
 }
 
-module "vpc" {
-  source = "../../modules/vpc"
+module "frontend" {
+  source = "../../../modules/frontend-app"
+
+  min_size = 5
+  max_size = 20
 }
 
-# Any module outputs need to be explicitly exposed.
-output "vpc_id" {
-  value = "${module.vpc.vpc_id}"
-}
-
-output "public_subnet_ids" {
-  value = "${module.vpc.public_subnet_ids}"
+# Adding Auto Scalign policy to prod env
+resource "aws_autoscaling_policy" "scale_out" {
+  name = "scale-out-frontend-app"
+  autoscaling_group_name = "${module.frontend.asg_name}"
+  adjustment_type = "ChangeInCapacity"
+  policy_type = "SimpleScaling"
+  scaling_adjustment = 1
+  cooldown = 200
 }
